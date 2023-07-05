@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:fl';
 
 void main() {
   runApp(MyApp());
 }
 
-void connectDevice(){
-
+void connectDevice() async{
+  FlutterBlue flutterBlue = FlutterBlue.instance;
+  BluetoothDevice? selectedDevice;
 }
 
 class MyFloatingActionButton extends StatelessWidget {
