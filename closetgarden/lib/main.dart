@@ -1,15 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:fl';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
+
+const broker = 'broker.mqttdashboard.com';
+const port = 1883;
+const topic = 'garden/sensor';
+const clientIdentifier = 'flutter';
+final client = MqttServerClient(broker, clientIdentifier);
+
+String receivedMessage = '';
 
 void main() {
+  // sets port
+  client.port=port;
   runApp(MyApp());
 }
 
-void connectDevice() async{
-  FlutterBlue flutterBlue = FlutterBlue.instance;
-  BluetoothDevice? selectedDevice;
+//Debug whether Values are received by Flutter app
+void messageReceived(String topic, MqttMessage message) {
+  if (message is MqttPublishMessage) {
+    String payload = MqttPublishPayload.bytesToStringAsString(message.payload.message);
+    setState(() {
+      receivedMessage = payload;
+    });
+  }
 }
 
+//handles the mqtt subscribe to topic
+void connectDevice() async {
+  await client.connect();
+  if (client.connectionStatus!.state == MqttConnectionState.connected) {
+    print('Connected to broker');
+    client.subscribe(topic, MqttQos.exactlyOnce);
+
+    client.updates?.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
+      for (MqttReceivedMessage<MqttMessage> message in messages) {
+        messageReceived(message.topic, message.payload);
+      }
+    });
+  }
+}
+
+//Styling FloatingActionButton
 class MyFloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -23,7 +55,8 @@ class MyFloatingActionButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30), // Adjust the borderRadius as needed
           ),
-          backgroundColor: Colors.indigoAccent, // Set the background color using the primary property
+          backgroundColor:
+          Colors.indigoAccent, // Set the background color using the primary property
         ),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -36,10 +69,8 @@ class MyFloatingActionButton extends StatelessWidget {
     );
   }
 }
-
+//
 class MyApp extends StatelessWidget {
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -49,15 +80,16 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
 
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
+
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String receivedMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +105,9 @@ class _MyHomePageState extends State<MyHomePage> {
             left: 0,
             right: 0,
             bottom: MediaQuery.of(context).size.height / 3,
-            child: Container(
-              child: Center(
-                child: Text(
-                  'hi'
-                ),
+            child: Center(
+              child: Text(
+                receivedMessage,
               ),
             ),
           ),
@@ -89,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ],
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
