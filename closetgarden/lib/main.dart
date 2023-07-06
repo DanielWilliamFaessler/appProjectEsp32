@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
-
-const broker = 'broker.mqttdashboard.com';
-const port = 1883;
-const topic = 'garden/sensor';
-const clientIdentifier = 'flutter';
-final client = MqttServerClient(broker, clientIdentifier);
+import 'Second.dart';
 
 void main() {
-  // sets port
-  client.port = port;
   runApp(MyApp());
 }
 
@@ -32,36 +23,13 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
+
 class _MyHomePageState extends State<MyHomePage> {
-  String receivedMessage = 'HI';
 
   @override
   void initState() {
     super.initState();
-    connectDevice();
-  }
-
-  void connectDevice() async {
-    await client.connect();
-    if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      print('Connected to broker');
-      client.subscribe(topic, MqttQos.exactlyOnce);
-
-      client.updates?.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
-        for (MqttReceivedMessage<MqttMessage> message in messages) {
-          messageReceived(message.topic, message.payload);
-        }
-      });
-    }
-  }
-
-  void messageReceived(String topic, MqttMessage message) {
-    if (message is MqttPublishMessage) {
-      String payload = MqttPublishPayload.bytesToStringAsString(message.payload.message);
-      setState(() {
-        receivedMessage = payload;
-      });
-    }
   }
 
   @override
@@ -80,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
             bottom: MediaQuery.of(context).size.height / 3,
             child: Center(
               child: Text(
-                receivedMessage,
+                'Silly',
               ),
             ),
           ),
@@ -98,12 +66,15 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MyFloatingActionButton extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 200, // Adjust the width as per your requirement
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => Second()));
+        },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30), // Adjust the borderRadius as needed
