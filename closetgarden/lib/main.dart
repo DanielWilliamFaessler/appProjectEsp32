@@ -8,68 +8,12 @@ const topic = 'garden/sensor';
 const clientIdentifier = 'flutter';
 final client = MqttServerClient(broker, clientIdentifier);
 
-String receivedMessage = '';
-
 void main() {
   // sets port
-  client.port=port;
+  client.port = port;
   runApp(MyApp());
 }
 
-//Debug whether Values are received by Flutter app
-void messageReceived(String topic, MqttMessage message) {
-  if (message is MqttPublishMessage) {
-    String payload = MqttPublishPayload.bytesToStringAsString(message.payload.message);
-    setState(() {
-      receivedMessage = payload;
-    });
-  }
-}
-
-//handles the mqtt subscribe to topic
-void connectDevice() async {
-  await client.connect();
-  if (client.connectionStatus!.state == MqttConnectionState.connected) {
-    print('Connected to broker');
-    client.subscribe(topic, MqttQos.exactlyOnce);
-
-    client.updates?.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
-      for (MqttReceivedMessage<MqttMessage> message in messages) {
-        messageReceived(message.topic, message.payload);
-      }
-    });
-  }
-}
-
-//Styling FloatingActionButton
-class MyFloatingActionButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 200, // Adjust the width as per your requirement
-      child: ElevatedButton(
-        onPressed: () {
-          connectDevice();
-        },
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30), // Adjust the borderRadius as needed
-          ),
-          backgroundColor:
-          Colors.indigoAccent, // Set the background color using the primary property
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(
-            'Connect Garden',
-            style: TextStyle(fontSize: 16), // Adjust the font size as needed
-          ),
-        ),
-      ),
-    );
-  }
-}
-//
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -89,7 +33,36 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String receivedMessage = '';
+  String receivedMessage = 'HI';
+
+  @override
+  void initState() {
+    super.initState();
+    connectDevice();
+  }
+
+  void connectDevice() async {
+    await client.connect();
+    if (client.connectionStatus!.state == MqttConnectionState.connected) {
+      print('Connected to broker');
+      client.subscribe(topic, MqttQos.exactlyOnce);
+
+      client.updates?.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
+        for (MqttReceivedMessage<MqttMessage> message in messages) {
+          messageReceived(message.topic, message.payload);
+        }
+      });
+    }
+  }
+
+  void messageReceived(String topic, MqttMessage message) {
+    if (message is MqttPublishMessage) {
+      String payload = MqttPublishPayload.bytesToStringAsString(message.payload.message);
+      setState(() {
+        receivedMessage = payload;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +92,32 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MyFloatingActionButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200, // Adjust the width as per your requirement
+      child: ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30), // Adjust the borderRadius as needed
+          ),
+          backgroundColor:
+          Colors.indigoAccent, // Set the background color using the primary property
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(
+            'Connect Garden',
+            style: TextStyle(fontSize: 16), // Adjust the font size as needed
+          ),
+        ),
       ),
     );
   }
