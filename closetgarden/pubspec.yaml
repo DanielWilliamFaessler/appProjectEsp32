@@ -54,7 +54,12 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
+flutter_launcher_icons:
+  image_path: "icons/leaf.jpg"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  resize_behavior: shrink_only
 # The following section is specific to Flutter packages.
 flutter:
 
