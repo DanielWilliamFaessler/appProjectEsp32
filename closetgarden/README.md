@@ -15,4 +15,4 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-Site to make virtual ESP32: https://wokwi.com/ -> just use a simple weather esp32 example to get started and set up client and topic appropriately
+Site to make virtual ESP32: https://wokwi.com/ -> just use a simple weather esp32 example to get started and set up topic appropriately (garden/sensor)
